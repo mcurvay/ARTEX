@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { translate } from "@/i18n";
 
 export function NavDocuments({
   items,
@@ -56,7 +57,7 @@ export function NavDocuments({
               >
                 <DropdownMenuItem>
                   <Folder />
-                  <span>Open</span>
+                  <span>{translate("Open")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Forward />
@@ -65,7 +66,7 @@ export function NavDocuments({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
                   <Trash2 />
-                  <span>Delete</span>
+                  <span>{translate("Delete")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -8,6 +8,9 @@ import {
   type Locale,
 } from "react-day-picker"
 
+import { tr as turkishLocale, zhCN } from "date-fns/locale"
+
+import { getLocale } from "@/i18n"
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
@@ -37,7 +40,7 @@ function Calendar({
         className
       )}
       captionLayout={captionLayout}
-      locale={locale}
+      locale={locale ?? (getLocale() === "tr" ? turkishLocale : zhCN)}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString(locale?.code, { month: "short" }),

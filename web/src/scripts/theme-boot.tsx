@@ -102,6 +102,10 @@ export function ThemeBootScript() {
 
         root.style.colorScheme = resolvedMode === "dark" ? "dark" : "light";
 
+        var storedLocale = null;
+        try { storedLocale = localStorage.getItem("artex.locale"); } catch (err) { storedLocale = null; }
+        root.lang = storedLocale === "tr" ? "tr" : "zh-CN";
+
       } catch (e) {
         console.warn("ThemeBootScript error:", e);
       }

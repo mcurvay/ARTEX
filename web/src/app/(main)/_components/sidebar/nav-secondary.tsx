@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { translate } from "@/i18n";
 
 export function NavSecondary({
   items,
@@ -31,7 +32,7 @@ export function NavSecondary({
               <SidebarMenuButton asChild>
                 <a href={item.url}>
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span>{translate(item.title)}</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

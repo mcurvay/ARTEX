@@ -1,5 +1,6 @@
 "use client"
 
+import { translate } from "@/i18n";
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
@@ -77,7 +78,7 @@ function SheetContent({
             >
               <XIcon
               />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{translate("Close")}</span>
             </Button>
           </SheetPrimitive.Close>
         )}

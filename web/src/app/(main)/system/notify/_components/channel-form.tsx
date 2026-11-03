@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { translate } from "@/i18n";
 import type { NotificationFilter } from "@/lib/types";
 
 // asText / inputType 是本文件内的取值辅助（与控件渲染强相关），不放在 channel-fields。
@@ -54,9 +55,9 @@ export function ConfigField({
   if (def.kind === "switch") {
     return (
       <div className="flex items-center gap-2 text-sm">
-        <Switch checked={value === true} onCheckedChange={onChange} aria-label={def.label} />
-        {def.label}
-        {def.help && <span className="text-muted-foreground">（{def.help}）</span>}
+        <Switch checked={value === true} onCheckedChange={onChange} aria-label={translate(def.label)} />
+        {translate(def.label)}
+        {def.help && <span className="text-muted-foreground">（{translate(def.help)}）</span>}
       </div>
     );
   }
@@ -64,7 +65,7 @@ export function ConfigField({
   if (def.kind === "select") {
     return (
       <div className="grid gap-2">
-        <Label>{def.label}</Label>
+        <Label>{translate(def.label)}</Label>
         <Select value={raw || def.options?.[0]?.value} onValueChange={onChange}>
           <SelectTrigger>
             <SelectValue />
@@ -72,7 +73,7 @@ export function ConfigField({
           <SelectContent>
             {(def.options ?? []).map((o) => (
               <SelectItem key={o.value} value={o.value}>
-                {o.label}
+                {translate(o.label)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -89,7 +90,7 @@ export function ConfigField({
         <Textarea
           id={id}
           className="font-mono"
-          placeholder={def.placeholder}
+          placeholder={translate(def.placeholder)}
           value={masked ? "" : raw}
           onChange={(e) => onChange(e.target.value)}
         />
@@ -101,7 +102,7 @@ export function ConfigField({
           id={id}
           value={Array.isArray(value) ? (value as string[]).join(", ") : raw}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={def.placeholder}
+          placeholder={translate(def.placeholder)}
         />
       );
     }
@@ -110,7 +111,7 @@ export function ConfigField({
         id={id}
         className={def.kind === "text" ? "font-mono" : ""}
         type={inputType(def.kind)}
-        placeholder={def.placeholder}
+        placeholder={translate(def.placeholder)}
         value={masked ? "" : raw}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -120,15 +121,17 @@ export function ConfigField({
   const hint = masked ? (
     <p className="text-muted-foreground flex items-center gap-1 text-xs">
       <CheckIcon className="size-3" />
-      已保存{maskedTail ? `（尾号 ${maskedTail}）` : ""} · 填入新值即覆盖，清空则删除该项
+      {translate("已保存%{v}· 填入新值即覆盖，清空则删除该项", {
+        v: maskedTail ? translate("（尾号 %{maskedTail}）", { maskedTail: maskedTail }) : "",
+      })}
     </p>
   ) : (
-    def.help && <p className="text-muted-foreground text-xs">{def.help}</p>
+    def.help && <p className="text-muted-foreground text-xs">{translate(def.help)}</p>
   );
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={id}>{def.label}</Label>
+      <Label htmlFor={id}>{translate(def.label)}</Label>
       {control()}
       {hint}
     </div>
@@ -141,13 +144,15 @@ export function FilterSummary({ filter }: { filter: NotificationFilter }) {
   if (filter.min_severity) {
     parts.push(SEVERITY_OPTIONS.find((o) => o.value === filter.min_severity)?.label ?? filter.min_severity);
   }
-  if (filter.vulnclass_include?.length) parts.push(`类型含 ${filter.vulnclass_include.length} 词`);
-  if (filter.vulnclass_exclude?.length) parts.push(`排除 ${filter.vulnclass_exclude.length} 词`);
-  if (filter.task_ids?.length) parts.push(`${filter.task_ids.length} 个任务`);
-  if (filter.asset_ids?.length) parts.push(`${filter.asset_ids.length} 个资产`);
-  if (filter.on_status_change) parts.push("含状态变更");
+  if (filter.vulnclass_include?.length)
+    parts.push(translate("类型含 %{length} 词", { length: filter.vulnclass_include.length }));
+  if (filter.vulnclass_exclude?.length)
+    parts.push(translate("排除 %{length} 词", { length: filter.vulnclass_exclude.length }));
+  if (filter.task_ids?.length) parts.push(translate("%{length} 个任务", { length: filter.task_ids.length }));
+  if (filter.asset_ids?.length) parts.push(translate("%{length} 个资产", { length: filter.asset_ids.length }));
+  if (filter.on_status_change) parts.push(translate("含状态变更"));
   if (parts.length === 0) {
-    return <p className="text-muted-foreground text-sm">全部漏洞</p>;
+    return <p className="text-muted-foreground text-sm">{translate("全部漏洞")}</p>;
   }
   return <p className="text-muted-foreground text-sm">{parts.join(" · ")}</p>;
 }

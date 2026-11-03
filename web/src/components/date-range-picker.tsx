@@ -8,6 +8,7 @@ import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { translate } from "@/i18n";
 
 interface DateRangePickerProps {
   value?: DateRange;
@@ -22,7 +23,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     return { from, to };
   });
   const dateRange = value ?? internalDateRange;
-  let dateRangeLabel = "Select date";
+  let dateRangeLabel = translate("Select date");
 
   if (dateRange?.from) {
     dateRangeLabel = format(dateRange.from, "d MMM yyyy");

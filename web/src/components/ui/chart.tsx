@@ -1,5 +1,7 @@
 "use client"
 
+import { translate } from "@/i18n";
+import { formatNumber } from "@/i18n/format";
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import type { TooltipValueType } from "recharts"
@@ -11,6 +13,10 @@ const THEMES = { light: "", dark: ".dark" } as const
 
 const INITIAL_DIMENSION = { width: 320, height: 200 } as const
 type TooltipNameType = number | string
+
+function seriesName(value: React.ReactNode | undefined) {
+  return typeof value === "string" ? translate(value) : value
+}
 
 export type ChartConfig = Record<
   string,
@@ -249,13 +255,13 @@ function ChartTooltipContent({
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
                         <span className="text-muted-foreground">
-                          {itemConfig?.label ?? item.name}
+                          {seriesName(itemConfig?.label ?? item.name)}
                         </span>
                       </div>
                       {item.value != null && (
                         <span className="font-mono font-medium text-foreground tabular-nums">
                           {typeof item.value === "number"
-                            ? item.value.toLocaleString()
+                            ? formatNumber(item.value)
                             : String(item.value)}
                         </span>
                       )}
@@ -319,7 +325,7 @@ function ChartLegendContent({
                   }}
                 />
               )}
-              {itemConfig?.label}
+              {seriesName(itemConfig?.label)}
             </div>
           )
         })}

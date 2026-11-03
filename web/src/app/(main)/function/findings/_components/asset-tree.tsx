@@ -15,9 +15,11 @@ import {
   SearchIcon,
   SmartphoneIcon,
 } from "lucide-react";
+import { Trans } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { translate } from "@/i18n";
 import type { FindingAssetKind, FindingAssetNode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -233,9 +235,9 @@ export function AssetTree({
     [isExpanded],
   );
 
-  let emptyHint = "当前筛选下没有关联到资产的发现。";
-  if (loading) emptyHint = "加载中…";
-  else if (searching) emptyHint = "没有匹配的资产。";
+  let emptyHint = translate("当前筛选下没有关联到资产的发现。");
+  if (loading) emptyHint = translate("加载中…");
+  else if (searching) emptyHint = translate("没有匹配的资产。");
 
   const rows: React.ReactNode[] = [];
   const pushRows = (list: TreeNode[]) => {
@@ -264,8 +266,8 @@ export function AssetTree({
             type="search"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            placeholder="过滤资产"
-            aria-label="过滤资产"
+            placeholder={translate("过滤资产")}
+            aria-label={translate("过滤资产")}
           />
           <InputGroupAddon>
             <SearchIcon aria-hidden="true" />
@@ -278,8 +280,8 @@ export function AssetTree({
             className="size-8 shrink-0 text-muted-foreground"
             onClick={onRefresh}
             disabled={loading}
-            aria-label="刷新资产树"
-            title="刷新资产树"
+            aria-label={translate("刷新资产树")}
+            title={translate("刷新资产树")}
           >
             <RefreshCwIcon className={cn("size-4", loading && "animate-spin")} />
           </Button>
@@ -294,8 +296,11 @@ export function AssetTree({
           selected === null ? "bg-accent font-medium" : "hover:bg-accent/50",
         )}
       >
-        <span>全部资产</span>
-        <span className="text-xs tabular-nums text-muted-foreground">{findingTotal}</span>
+        <Trans
+          i18nKey={"<span>全部资产</span><c0>%{findingTotal}</c0>"}
+          values={{ findingTotal: findingTotal }}
+          components={{ c0: <span className="text-xs tabular-nums text-muted-foreground" /> }}
+        />
       </button>
 
       <div className="max-h-[24rem] min-h-0 flex-1 overflow-y-auto pr-2 lg:max-h-[calc(100vh-16rem)]">
@@ -307,8 +312,9 @@ export function AssetTree({
 
       {truncated && (
         <p className="px-1 text-xs text-muted-foreground">
-          资产过多，已隐藏{(droppedKinds ?? []).map((k) => KIND_LABEL[k as FindingAssetKind] ?? k).join(" / ")}
-          层级（计数仍已计入上层）。用筛选或过滤框收窄可看到完整层级。
+          {translate("资产过多，已隐藏")}
+          {(droppedKinds ?? []).map((k) => KIND_LABEL[k as FindingAssetKind] ?? k).join(" / ")}
+          {translate("层级（计数仍已计入上层）。用筛选或过滤框收窄可看到完整层级。")}
         </p>
       )}
     </div>
@@ -343,7 +349,7 @@ function AssetTreeRow({
           type="button"
           onClick={onToggle}
           className="flex size-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-foreground"
-          aria-label={open ? "折叠" : "展开"}
+          aria-label={open ? translate("折叠") : translate("展开")}
           aria-expanded={open}
         >
           <ChevronRightIcon className={cn("size-3.5 transition-transform", open && "rotate-90")} />
@@ -362,16 +368,16 @@ function AssetTreeRow({
       </button>
       <span className="flex shrink-0 items-center gap-1 text-xs tabular-nums">
         {node.critical > 0 && (
-          <span className="text-rose-600" title={`严重 ${node.critical}`}>
+          <span className="text-rose-600" title={translate("严重 %{critical}", { critical: node.critical })}>
             {node.critical}
           </span>
         )}
         {node.high > 0 && (
-          <span className="text-red-500" title={`高危 ${node.high}`}>
+          <span className="text-red-500" title={translate("高危 %{high}", { high: node.high })}>
             {node.high}
           </span>
         )}
-        <span className="text-muted-foreground" title={`共 ${node.total} 条发现`}>
+        <span className="text-muted-foreground" title={translate("共 %{total} 条发现", { total: node.total })}>
           {node.total}
         </span>
       </span>

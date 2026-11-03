@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { translate } from "@/i18n";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
 import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
 import {
@@ -127,7 +128,7 @@ export function LayoutControls() {
                               (resolvedThemeMode ?? "light") === "dark" ? preset.primary.dark : preset.primary.light,
                           }}
                         />
-                        {preset.label}
+                        {translate(preset.label)}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -145,7 +146,7 @@ export function LayoutControls() {
                   <SelectGroup>
                     {fontOptions.map((font) => (
                       <SelectItem key={font.key} className="text-xs" value={font.key}>
-                        {font.label}
+                        {translate(font.label)}
                       </SelectItem>
                     ))}
                   </SelectGroup>

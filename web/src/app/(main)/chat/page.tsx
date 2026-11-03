@@ -20,12 +20,13 @@ import {
   XIcon,
   ZapIcon,
 } from "lucide-react";
+import { Trans } from "react-i18next";
 import { toast } from "sonner";
 
+import { ApprovalExecutionFocus, useApprovalFocus, useApprovalHistory } from "@/components/approval-execution-focus";
 import { MentionTextarea } from "@/components/mention-textarea";
 import { SideQuestionButton, SideQuestionWorkspace } from "@/components/side-question-workspace";
 import { TodoPopover } from "@/components/todo-popover";
-import { ApprovalExecutionFocus, useApprovalFocus, useApprovalHistory } from "@/components/approval-execution-focus";
 import { Transcript } from "@/components/transcript";
 import {
   AlertDialog,
@@ -53,6 +54,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useSideQuestions } from "@/hooks/use-side-questions";
+import { translate } from "@/i18n";
+import { compareText, formatDateTime } from "@/i18n/format";
 import { mergeActivities } from "@/lib/activity-merge";
 import { api } from "@/lib/api";
 import { shouldSubmitOnKey, useChatSendMode } from "@/lib/chat-send-mode";
@@ -136,8 +139,10 @@ function groupByAgent(conversations: Conversation[], agentByKey: Map<string, Age
 function LiveBadge() {
   return (
     <span className="inline-flex items-center gap-1 rounded bg-blue-500/15 px-1.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
-      <span className="size-1 animate-pulse rounded-full bg-blue-500" />
-      实时
+      <Trans
+        i18nKey={"<c0></c0>实时"}
+        components={{ c0: <span className="size-1 animate-pulse rounded-full bg-blue-500" /> }}
+      />
     </span>
   );
 }
@@ -203,7 +208,7 @@ function Composer({
                   type="button"
                   className="ml-0.5 text-muted-foreground hover:text-foreground"
                   onClick={() => onRemoveAttachment(a.path)}
-                  title="移除"
+                  title={translate("移除")}
                 >
                   <XIcon className="size-3" />
                 </button>
@@ -234,7 +239,7 @@ function Composer({
               variant="ghost"
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled || uploading}
-              title="上传文件"
+              title={translate("上传文件")}
             >
               {uploading ? <Loader2Icon className="size-4 animate-spin" /> : <PaperclipIcon className="size-4" />}
             </Button>
@@ -250,14 +255,20 @@ function Composer({
           onKeyDown={onKeyDown}
         />
         {running && allowBtw && isBtwCommand(value) && (
-          <Button size="icon" onClick={onSend} aria-label="发送旁路问题" title="发送旁路问题">
+          <Button size="icon" onClick={onSend} aria-label={translate("发送旁路问题")} title={translate("发送旁路问题")}>
             <ArrowUpIcon />
           </Button>
         )}
         {running ? (
           // while a run is in flight the send button becomes a stop button —
           // aborts just this session (the trigger queue keeps going).
-          <Button size="icon" variant="destructive" onClick={onStop} disabled={stopDisabled} title="停止本次运行">
+          <Button
+            size="icon"
+            variant="destructive"
+            onClick={onStop}
+            disabled={stopDisabled}
+            title={translate("停止本次运行")}
+          >
             <Square className="size-3.5 fill-current" />
           </Button>
         ) : (
@@ -265,8 +276,8 @@ function Composer({
             size="icon"
             onClick={onSend}
             disabled={disabled || (!value.trim() && atts.length === 0)}
-            title="发送消息"
-            aria-label="发送消息"
+            title={translate("发送消息")}
+            aria-label={translate("发送消息")}
           >
             <ArrowUpIcon />
           </Button>
@@ -294,7 +305,7 @@ function LLMProfileRow({
   const [open, setOpen] = React.useState(false);
   const activeDefault = profiles.find((p) => p.is_default);
   const current = selected != null ? profiles.find((p) => Number(p.id) === selected) : null;
-  const label = current ? current.name : `默认${activeDefault ? `（${activeDefault.name}）` : ""}`;
+  const label = current ? current.name : translate("默认%{v}", { v: activeDefault ? `（${activeDefault.name}）` : "" });
 
   return (
     <div className="flex min-w-0 shrink-0 items-center gap-1 px-1 pt-0.5 pb-1">
@@ -309,12 +320,12 @@ function LLMProfileRow({
             disabled={disabled}
             className="flex shrink-0 items-center gap-0.5 text-primary text-xs hover:underline disabled:pointer-events-none disabled:opacity-40"
           >
-            更换
+            {translate("更换")}
             <ChevronDownIcon className="size-3" />
           </button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-64 p-1">
-          <p className="text-muted-foreground px-2 py-1 text-[11px] font-medium">选择 LLM 配置</p>
+          <p className="text-muted-foreground px-2 py-1 text-[11px] font-medium">{translate("选择 LLM 配置")}</p>
           {/* default option */}
           <button
             type="button"
@@ -327,12 +338,18 @@ function LLMProfileRow({
               selected == null && "bg-accent",
             )}
           >
-            <span className="text-sm">默认{activeDefault ? `（${activeDefault.name}）` : ""}</span>
-            {activeDefault && (
-              <span className="text-muted-foreground text-[11px]">
-                {activeDefault.format} · {activeDefault.model}
-              </span>
-            )}
+            <Trans
+              i18nKey={"<c0>默认%{v}</c0>%{v2}"}
+              values={{
+                v: activeDefault ? `（${activeDefault.name}）` : "",
+                v2: activeDefault && (
+                  <span className="text-muted-foreground text-[11px]">
+                    {activeDefault.format} · {activeDefault.model}
+                  </span>
+                ),
+              }}
+              components={{ c0: <span className="text-sm" /> }}
+            />
           </button>
           {profiles.map((p) => (
             <button
@@ -395,7 +412,7 @@ function DraftChat({
       await api.sendConversationMessage(c.id, msg);
       onStarted(c);
     } catch (e) {
-      toast.error("发送失败：" + (e as Error).message);
+      toast.error(translate("发送失败：%{message}", { message: (e as Error).message }));
       setSending(false);
     }
   }
@@ -413,7 +430,7 @@ function DraftChat({
       const r = await api.chatUpload("session", `conv-${c.id}`, files);
       onStarted(c, { input, attachments: r.attachments });
     } catch (e) {
-      toast.error("上传失败：" + (e as Error).message);
+      toast.error(translate("上传失败：%{message}", { message: (e as Error).message }));
       setUploading(false);
     }
   }
@@ -421,7 +438,7 @@ function DraftChat({
   const agentPicker = (
     <Select value={agentKey} onValueChange={setAgentKey}>
       <SelectTrigger className="w-full sm:w-40">
-        <SelectValue placeholder="选择 Agent…" />
+        <SelectValue placeholder={translate("选择 Agent…")} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
@@ -432,7 +449,7 @@ function DraftChat({
                 {a.name}
                 {!a.builtin && (
                   <Badge variant="outline" className="px-1 py-0 text-[9px]">
-                    自定义
+                    {translate("自定义")}
                   </Badge>
                 )}
               </span>
@@ -450,8 +467,8 @@ function DraftChat({
         <div className="bg-primary/10 flex size-12 items-center justify-center rounded-full">
           <Bot className="text-primary size-6" />
         </div>
-        <div className="text-sm font-medium">开始和「{agent?.name ?? "Agent"}」对话</div>
-        {agent?.description && <p className="text-muted-foreground max-w-md text-xs">{agent.description}</p>}
+        <div className="text-sm font-medium">{translate("开始和「%{v}」对话", { v: agent?.name ?? "Agent" })}</div>
+        {agent?.description && <p className="text-muted-foreground max-w-md text-xs">{translate(agent.description)}</p>}
       </div>
 
       <Composer
@@ -459,7 +476,7 @@ function DraftChat({
         onChange={setInput}
         onSend={send}
         disabled={sending || uploading || !agentKey}
-        placeholder="输入消息，@ 引用记录，Enter 发送"
+        placeholder={translate("输入消息，@ 引用记录，Enter 发送")}
         leftSlot={agentPicker}
         onPickFiles={pickFiles}
         uploading={uploading}
@@ -518,7 +535,7 @@ function ChatView({
       await api.updateConversationProfile(conv.id, id);
       onConvUpdated();
     } catch (e) {
-      toast.error("切换 LLM 失败：" + (e as Error).message);
+      toast.error(translate("切换 LLM 失败：%{message}", { message: (e as Error).message }));
     }
   }
 
@@ -607,14 +624,23 @@ function ChatView({
     };
   }, [running, conv.id, onTitleMaybeChanged]);
 
-  const loadFocusPage = React.useCallback((before: number) => api.conversationHistory(conv.id, before, HISTORY_PAGE), [conv.id]);
+  const loadFocusPage = React.useCallback(
+    (before: number) => api.conversationHistory(conv.id, before, HISTORY_PAGE),
+    [conv.id],
+  );
   const mergeFocusPage = React.useCallback((page: { items: Activity[]; hasMore: boolean }) => {
     setMessages((prev) => mergeActivities(page.items, prev));
     earliestRef.current = page.items[0]?.seq ?? earliestRef.current;
     hasMoreRef.current = page.hasMore;
     setHasMore(page.hasMore);
   }, []);
-  const focusHistory = useApprovalHistory(approvalFocus.state?.source, historyLoaded, messages, loadFocusPage, mergeFocusPage);
+  const focusHistory = useApprovalHistory(
+    approvalFocus.state?.source,
+    historyLoaded,
+    messages,
+    loadFocusPage,
+    mergeFocusPage,
+  );
 
   // ---- transcript auto-scroll (open → bottom; stick to bottom unless scrolled up) ----
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -716,7 +742,7 @@ function ChatView({
       const r = await api.chatUpload("session", `conv-${conv.id}`, files);
       setAttachments((prev) => [...prev, ...r.attachments]);
     } catch (e) {
-      toast.error("上传失败：" + (e as Error).message);
+      toast.error(translate("上传失败：%{message}", { message: (e as Error).message }));
     } finally {
       setUploading(false);
     }
@@ -736,7 +762,7 @@ function ChatView({
       // fetch avoids racing a separate post-send request against the poller.
       setRunning(true);
     } catch (e) {
-      toast.error("发送失败：" + (e as Error).message);
+      toast.error(translate("发送失败：%{message}", { message: (e as Error).message }));
       setInput(msg); // restore so the user doesn't lose their text
       setAttachments(atts); // and their attachments
     } finally {
@@ -753,7 +779,7 @@ function ChatView({
     try {
       await api.stopConversation(conv.id);
     } catch (e) {
-      toast.error("停止失败：" + (e as Error).message);
+      toast.error(translate("停止失败：%{message}", { message: (e as Error).message }));
     } finally {
       setStopping(false);
     }
@@ -768,18 +794,18 @@ function ChatView({
         <span className="text-muted-foreground hidden shrink-0 font-mono text-xs sm:inline">{conv.agent_key}</span>
         {agent && !agent.builtin && (
           <Badge variant="outline" className="shrink-0 px-1.5 py-0 text-[10px]">
-            自定义
+            {translate("自定义")}
           </Badge>
         )}
         {agent?.description && (
-          <span className="text-muted-foreground min-w-0 truncate text-xs">{agent.description}</span>
+          <span className="text-muted-foreground min-w-0 truncate text-xs">{translate(agent.description)}</span>
         )}
         {running && <LiveBadge />}
         <SideQuestionButton side={side} />
         <div className="text-muted-foreground ml-auto flex min-w-0 max-w-full items-center justify-end gap-x-3 gap-y-1 text-xs max-sm:w-full max-sm:flex-wrap">
           {tokenTotal.turns > 0 && (
-            <span title="agent 循环轮次（模型调用次数）" className="tabular-nums">
-              {tokenTotal.turns} 轮
+            <span title={translate("agent 循环轮次（模型调用次数）")} className="tabular-nums">
+              {tokenTotal.turns} {translate("轮")}
             </span>
           )}
           {tokenTotal.any && (
@@ -797,14 +823,24 @@ function ChatView({
         <div className="min-w-0 max-w-full px-4 py-3" ref={contentRef}>
           {messages.length === 0 && !running ? (
             <div className="text-muted-foreground py-10 text-center text-sm">
-              开始和「{agent?.name ?? conv.agent_key}」对话
+              {translate("开始和「")}
+              {agent?.name ?? conv.agent_key}
+              {translate("」对话")}
             </div>
           ) : (
             <>
               {hasMore && (
-                <div className="text-muted-foreground/70 pb-2 text-center text-[11px]">向上滚动加载更早的消息…</div>
+                <div className="text-muted-foreground/70 pb-2 text-center text-[11px]">
+                  {translate("向上滚动加载更早的消息…")}
+                </div>
               )}
-              <Transcript activity={messages} live={running} chat fetchDetail={fetchDetail} focusedSeq={focusHistory.ready ? approvalFocus.state?.source?.seq : undefined} />
+              <Transcript
+                activity={messages}
+                live={running}
+                chat
+                fetchDetail={fetchDetail}
+                focusedSeq={focusHistory.ready ? approvalFocus.state?.source?.seq : undefined}
+              />
             </>
           )}
         </div>
@@ -816,7 +852,9 @@ function ChatView({
         onSend={send}
         disabled={running || sending}
         allowBtw
-        placeholder={running ? "Agent 正在回复，可输入 /btw 提问…" : "输入消息，@ 引用记录，Enter 发送"}
+        placeholder={
+          running ? translate("Agent 正在回复，可输入 /btw 提问…") : translate("输入消息，@ 引用记录，Enter 发送")
+        }
         running={running}
         onStop={stop}
         stopDisabled={stopping}
@@ -897,7 +935,7 @@ const ConversationItem = React.memo(function ConversationItem({
         <Checkbox
           checked={selectedForDelete}
           onCheckedChange={(checked) => onSelectedForDeleteChange(conv.id, checked === true)}
-          aria-label={`选择对话「${conv.title || "新对话"}」`}
+          aria-label={translate("选择对话「%{v}」", { v: conv.title || translate("新对话") })}
           className="ml-1 shrink-0"
         />
       )}
@@ -924,16 +962,16 @@ const ConversationItem = React.memo(function ConversationItem({
           type="button"
           onClick={() => onSelect(conv.id)}
           onDoubleClick={() => onStartRename(conv)}
-          title="双击重命名"
+          title={translate("双击重命名")}
           className="min-w-0 flex-1 rounded-md px-2 py-1.5 text-left"
         >
           <div className="flex min-w-0 items-center gap-1.5">
-            {pinned && <PinIcon className="text-primary size-3 shrink-0" aria-label="已置顶" />}
-            <div className="truncate text-sm">{conv.title || "新对话"}</div>
+            {pinned && <PinIcon className="text-primary size-3 shrink-0" aria-label={translate("已置顶")} />}
+            <div className="truncate text-sm">{translate(conv.title || translate("新对话"))}</div>
             {conv.running ? (
-              <Badge variant="secondary" className="shrink-0 gap-1" title="Agent 正在运行">
+              <Badge variant="secondary" className="shrink-0 gap-1" title={translate("Agent 正在运行")}>
                 <Spinner className="size-3" aria-hidden="true" />
-                运行中
+                {translate("运行中")}
               </Badge>
             ) : null}
           </div>
@@ -946,7 +984,7 @@ const ConversationItem = React.memo(function ConversationItem({
               </>
             )}
             <span className="shrink-0">
-              {new Date(conv.created_at).toLocaleDateString("zh-CN", {
+              {formatDateTime(new Date(conv.created_at), {
                 month: "numeric",
                 day: "numeric",
                 hour: "2-digit",
@@ -963,7 +1001,7 @@ const ConversationItem = React.memo(function ConversationItem({
             variant="ghost"
             size="icon-sm"
             className="text-muted-foreground shrink-0"
-            aria-label={`管理对话「${conv.title || "新对话"}」`}
+            aria-label={translate("管理对话「%{v}」", { v: conv.title || translate("新对话") })}
           >
             <MoreHorizontalIcon />
           </Button>
@@ -972,18 +1010,18 @@ const ConversationItem = React.memo(function ConversationItem({
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => onStartRename(conv)}>
               <PencilIcon />
-              重命名
+              {translate("重命名")}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => onTogglePinned(conv)}>
               {pinned ? <PinOffIcon /> : <PinIcon />}
-              {pinned ? "取消置顶" : "置顶"}
+              {pinned ? translate("取消置顶") : translate("置顶")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem variant="destructive" onSelect={() => setDeleteOpen(true)}>
               <Trash2Icon />
-              删除
+              {translate("删除")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -991,12 +1029,14 @@ const ConversationItem = React.memo(function ConversationItem({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>删除对话「{conv.title || "新对话"}」？</AlertDialogTitle>
-            <AlertDialogDescription>此操作不可撤销。</AlertDialogDescription>
+            <AlertDialogTitle>
+              {translate("删除对话「%{v}」？", { v: conv.title || translate("新对话") })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{translate("此操作不可撤销。")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onDelete(conv.id)}>删除</AlertDialogAction>
+            <AlertDialogCancel>{translate("取消")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onDelete(conv.id)}>{translate("删除")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1022,7 +1062,11 @@ function AgentGroupHeader({
       type="button"
       onClick={() => onToggle(group.key)}
       aria-expanded={!collapsed}
-      title={collapsed ? `展开「${group.name}」` : `收起「${group.name}」`}
+      title={
+        collapsed
+          ? translate("展开「%{name}」", { name: group.name })
+          : translate("收起「%{name}」", { name: group.name })
+      }
       className={cn(
         "sticky top-0 z-10 flex min-w-0 items-center gap-1.5 rounded-md bg-card px-1.5 py-1 text-left font-medium text-[11px] transition-colors hover:bg-accent/50",
         collapsed && hasActive ? "text-foreground" : "text-muted-foreground",
@@ -1032,10 +1076,13 @@ function AgentGroupHeader({
       <Bot className="size-3 shrink-0" />
       <span className="min-w-0 flex-1 truncate">{group.name}</span>
       {collapsed && hasActive && (
-        <span className="size-1.5 shrink-0 rounded-full bg-primary" title="当前对话在此分组内" />
+        <span className="size-1.5 shrink-0 rounded-full bg-primary" title={translate("当前对话在此分组内")} />
       )}
       {group.runningCount > 0 && (
-        <Spinner className="size-3 shrink-0" aria-label={`${group.runningCount} 个对话运行中`} />
+        <Spinner
+          className="size-3 shrink-0"
+          aria-label={translate("%{runningCount} 个对话运行中", { runningCount: group.runningCount })}
+        />
       )}
       <span className="shrink-0 tabular-nums opacity-60">{group.conversations.length}</span>
     </button>
@@ -1050,15 +1097,18 @@ export default function ChatPage() {
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
   const [sourceRequested, setSourceRequested] = React.useState(false);
   const [convsLoaded, setConvsLoaded] = React.useState(false);
-  const selectConversation = React.useCallback((id: number | null) => {
-    if (id !== selectedId) {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("approval");
-      setSourceRequested(false);
-      window.history.replaceState(null, "", url);
-    }
-    setSelectedId(id);
-  }, [selectedId]);
+  const selectConversation = React.useCallback(
+    (id: number | null) => {
+      if (id !== selectedId) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("approval");
+        setSourceRequested(false);
+        window.history.replaceState(null, "", url);
+      }
+      setSelectedId(id);
+    },
+    [selectedId],
+  );
 
   const [renamingId, setRenamingId] = React.useState<number | null>(null);
   const [renameText, setRenameText] = React.useState("");
@@ -1085,7 +1135,10 @@ export default function ChatPage() {
     const seq = ++conversationListSeq.current;
     try {
       const items = await api.conversations();
-      if (seq === conversationListSeq.current) { setConvs(items); setConvsLoaded(true); }
+      if (seq === conversationListSeq.current) {
+        setConvs(items);
+        setConvsLoaded(true);
+      }
     } catch {
       // Preserve the selected transcript and list on a transient poll failure.
     }
@@ -1211,10 +1264,12 @@ export default function ChatPage() {
     if (agentFilter !== null) keys.add(agentFilter);
     return [...keys]
       .map((key) => ({ key, name: agentByKey.get(key)?.name || key, count: counts.get(key) ?? 0 }))
-      .sort((a, b) => a.name.localeCompare(b.name, "zh-CN"));
+      .sort((a, b) => compareText(a.name, b.name));
   }, [convs, chatAgents, agentByKey, agentFilter]);
   const conversationCountLabel =
-    agentFilter === null ? `共 ${convs.length} 个` : `${filteredConversations.length} / ${convs.length} 个`;
+    agentFilter === null
+      ? translate("共 %{length} 个", { length: convs.length })
+      : translate("%{length} / %{length2} 个", { length: filteredConversations.length, length2: convs.length });
 
   function changeAgentFilter(key: string | null) {
     setAgentFilter(key);
@@ -1265,7 +1320,7 @@ export default function ChatPage() {
         });
         void reloadConvs();
       } catch (e) {
-        toast.error("删除失败：" + (e as Error).message);
+        toast.error(translate("删除失败：%{message}", { message: (e as Error).message }));
       }
     },
     [reloadConvs],
@@ -1282,7 +1337,7 @@ export default function ChatPage() {
         const result = await api.deleteConversations(ids.slice(offset, offset + 100));
         for (const item of result.items) {
           if (item.ok) deleted.add(item.id);
-          else failed.push({ id: item.id, error: item.error ?? "对话不存在" });
+          else failed.push({ id: item.id, error: item.error ?? translate("对话不存在") });
         }
       }
       if (deleted.has(selectedId ?? -1)) selectConversation(null);
@@ -1291,13 +1346,17 @@ export default function ChatPage() {
         for (const id of deleted) next.delete(id);
         return next;
       });
-      if (deleted.size > 0) toast.success(`已删除 ${deleted.size} 个对话`);
+      if (deleted.size > 0) toast.success(translate("已删除 %{size} 个对话", { size: deleted.size }));
       if (failed.length > 0) {
         const details = failed
           .slice(0, 3)
           .map((item) => `#${item.id}（${item.error}）`)
           .join("；");
-        toast.error(`${failed.length} 个对话删除失败：${details}${failed.length > 3 ? " 等" : ""}`);
+        toast.error(
+          failed.length > 3
+            ? translate("%{length} 个对话删除失败：%{details} 等", { length: failed.length, details: details })
+            : translate("%{length} 个对话删除失败：%{details}", { length: failed.length, details: details }),
+        );
       }
       setBulkDeleteOpen(false);
       // Fully successful → return to the clean list; keep selection mode on if
@@ -1305,7 +1364,7 @@ export default function ChatPage() {
       if (failed.length === 0) setSelectionMode(false);
       void reloadConvs();
     } catch (error) {
-      toast.error(`批量删除失败：${(error as Error).message}`);
+      toast.error(translate("批量删除失败：%{message}", { message: (error as Error).message }));
       void reloadConvs();
     } finally {
       setBulkDeleting(false);
@@ -1319,7 +1378,11 @@ export default function ChatPage() {
         await api.pinConversation(conversation.id, !pinned);
         void reloadConvs();
       } catch (e) {
-        toast.error(`${pinned ? "取消置顶" : "置顶"}失败：${(e as Error).message}`);
+        toast.error(
+          pinned
+            ? translate("取消置顶失败：%{message}", { message: (e as Error).message })
+            : translate("置顶失败：%{message}", { message: (e as Error).message }),
+        );
       }
     },
     [reloadConvs],
@@ -1338,7 +1401,7 @@ export default function ChatPage() {
         await api.renameConversation(id, title);
         void reloadConvs();
       } catch (e) {
-        toast.error("重命名失败：" + (e as Error).message);
+        toast.error(translate("重命名失败：%{message}", { message: (e as Error).message }));
       }
     },
     [reloadConvs],
@@ -1355,20 +1418,20 @@ export default function ChatPage() {
         <div className="bg-card flex flex-col overflow-hidden rounded-lg border">
           <div className="flex flex-col gap-2 border-b p-2">
             <Button size="sm" className="w-full" onClick={() => selectConversation(null)}>
-              <PlusIcon /> 新建对话
+              <PlusIcon /> {translate("新建对话")}
             </Button>
             <Select
               value={agentFilter === null ? "all" : `agent:${agentFilter}`}
               onValueChange={(value) => changeAgentFilter(value === "all" ? null : value.slice(6))}
               disabled={bulkDeleting}
             >
-              <SelectTrigger size="sm" className="w-full min-w-0" aria-label="按 Agent 筛选对话">
+              <SelectTrigger size="sm" className="w-full min-w-0" aria-label={translate("按 Agent 筛选对话")}>
                 <Bot />
-                <SelectValue placeholder="全部 Agent" />
+                <SelectValue placeholder={translate("全部 Agent")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">全部 Agent</SelectItem>
+                  <SelectItem value="all">{translate("全部 Agent")}</SelectItem>
                   {agentFilterOptions.map((agent) => (
                     <SelectItem key={agent.key} value={`agent:${agent.key}`}>
                       {agent.name}（{agent.count}）
@@ -1383,11 +1446,15 @@ export default function ChatPage() {
                   <Checkbox
                     checked={conversationHeaderChecked}
                     onCheckedChange={(checked) => toggleAllConversations(checked === true)}
-                    aria-label="选择当前筛选的全部对话"
+                    aria-label={translate("选择当前筛选的全部对话")}
                     disabled={filteredConversations.length === 0 || bulkDeleting}
                   />
                   <span className="text-muted-foreground min-w-0 flex-1 text-xs tabular-nums">
-                    {selectedConversationCount > 0 ? `已选 ${selectedConversationCount} 个` : conversationCountLabel}
+                    {selectedConversationCount > 0
+                      ? translate("已选 %{selectedConversationCount} 个", {
+                          selectedConversationCount: selectedConversationCount,
+                        })
+                      : conversationCountLabel}
                   </span>
                   {selectedConversationCount > 0 && (
                     <Button
@@ -1397,11 +1464,11 @@ export default function ChatPage() {
                       onClick={() => setBulkDeleteOpen(true)}
                     >
                       <Trash2Icon data-icon="inline-start" />
-                      删除
+                      {translate("删除")}
                     </Button>
                   )}
                   <Button size="sm" variant="ghost" onClick={exitSelectionMode}>
-                    完成
+                    {translate("完成")}
                   </Button>
                 </div>
               ) : (
@@ -1417,7 +1484,7 @@ export default function ChatPage() {
                     disabled={filteredConversations.length === 0}
                   >
                     <ListChecksIcon data-icon="inline-start" />
-                    多选
+                    {translate("多选")}
                   </Button>
                 </div>
               ))}
@@ -1430,7 +1497,7 @@ export default function ChatPage() {
             <div className="flex min-w-0 flex-col gap-0.5 p-2">
               {filteredConversations.length === 0 && (
                 <p className="text-muted-foreground px-2 py-6 text-center text-xs">
-                  {agentFilter === null ? "暂无对话" : "该 Agent 暂无对话"}
+                  {agentFilter === null ? translate("暂无对话") : translate("该 Agent 暂无对话")}
                 </p>
               )}
               {pinnedConversations.map((c) => (
@@ -1496,7 +1563,7 @@ export default function ChatPage() {
                   className="mt-1 w-full"
                   onClick={() => setVisibleConversationCount((count) => count + CONVERSATION_LIST_PAGE)}
                 >
-                  加载更多
+                  {translate("加载更多")}
                 </Button>
               )}
             </div>
@@ -1517,7 +1584,7 @@ export default function ChatPage() {
             />
           ) : sourceRequested ? (
             <div role="status" className="p-6 text-sm text-muted-foreground">
-              {convsLoaded ? "对话已被删除" : "正在加载对应对话…"}
+              {convsLoaded ? translate("对话已被删除") : translate("正在加载对应对话…")}
             </div>
           ) : (
             <DraftChat
@@ -1545,11 +1612,17 @@ export default function ChatPage() {
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>删除选中的 {selectedConversationCount} 个对话？</AlertDialogTitle>
-            <AlertDialogDescription>对话消息和执行记录将一并删除，此操作不可撤销。</AlertDialogDescription>
+            <AlertDialogTitle>
+              {translate("删除选中的 %{selectedConversationCount}个对话？", {
+                selectedConversationCount: selectedConversationCount,
+              })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {translate("对话消息和执行记录将一并删除，此操作不可撤销。")}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDeleting}>取消</AlertDialogCancel>
+            <AlertDialogCancel disabled={bulkDeleting}>{translate("取消")}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={bulkDeleting || selectedConversationCount === 0}
@@ -1559,7 +1632,7 @@ export default function ChatPage() {
               }}
             >
               {bulkDeleting && <Loader2Icon data-icon="inline-start" className="animate-spin" />}
-              {bulkDeleting ? "删除中" : "确认删除"}
+              {bulkDeleting ? translate("删除中") : translate("确认删除")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

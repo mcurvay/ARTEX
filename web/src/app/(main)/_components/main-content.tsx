@@ -4,9 +4,11 @@ import { type ReactNode, useEffect, useState } from "react";
 
 import { usePathname } from "next/navigation";
 
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { translate } from "@/i18n";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -66,10 +68,13 @@ export function MainContent({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-2">
             {version && (
-              <span className="font-medium text-muted-foreground text-xs tabular-nums">版本 · {version}</span>
+              <span className="font-medium text-muted-foreground text-xs tabular-nums">
+                {translate("版本 · %{version}", { version })}
+              </span>
             )}
             <UpdateBadge />
             <LayoutControls />
+            <LanguageSwitcher />
             <ThemeSwitcher />
             <AccountSwitcher users={[currentUser]} />
           </div>

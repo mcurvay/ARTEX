@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { localeUpper } from "@/i18n/format";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -82,9 +84,8 @@ export const getInitials = (str: string): string => {
       .trim()
       .split(/\s+/)
       .filter(Boolean)
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase() || "?"
+      .map((word) => localeUpper(word[0] ?? ""))
+      .join("") || "?"
   );
 };
 
