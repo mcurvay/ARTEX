@@ -3,10 +3,12 @@
 import { useEffect, useRef } from "react";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { Trans } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem } from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { translate } from "@/i18n";
 
 interface TablePaginationProps {
   page: number; // 1-based
@@ -64,14 +66,20 @@ export function TablePagination({
             ))}
           </SelectContent>
         </Select>
-        <span>条/页</span>
-        {total > 0 ? (
-          <span className="tabular-nums">
-            {from}–{to} / 共 {total} 条
-          </span>
-        ) : (
-          <span>共 0 条</span>
-        )}
+        <Trans
+          i18nKey={"<span>条/页</span>%{v}"}
+          values={{
+            v:
+              total > 0 ? (
+                <span className="tabular-nums">
+                  {from}–{to} {translate("/ 共")}
+                  {total} {translate("条")}
+                </span>
+              ) : (
+                <span>{translate("共 0 条")}</span>
+              ),
+          }}
+        />
       </div>
 
       {totalPages > 1 && (
@@ -83,7 +91,7 @@ export function TablePagination({
                 size="icon-sm"
                 disabled={safePage === 1}
                 onClick={() => onPageChange(safePage - 1)}
-                aria-label="上一页"
+                aria-label={translate("上一页")}
               >
                 <ChevronLeftIcon className="size-4" />
               </Button>
@@ -112,7 +120,7 @@ export function TablePagination({
                 size="icon-sm"
                 disabled={safePage === totalPages}
                 onClick={() => onPageChange(safePage + 1)}
-                aria-label="下一页"
+                aria-label={translate("下一页")}
               >
                 <ChevronRightIcon className="size-4" />
               </Button>

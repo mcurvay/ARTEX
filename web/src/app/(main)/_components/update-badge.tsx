@@ -5,7 +5,9 @@ import * as React from "react";
 import Link from "next/link";
 
 import { ArrowUpCircleIcon } from "lucide-react";
+import { Trans } from "react-i18next";
 
+import { translate } from "@/i18n";
 import { api } from "@/lib/api";
 
 /**
@@ -42,7 +44,7 @@ export function UpdateBadge() {
   return (
     <Link
       href="/system/settings"
-      title={`发现新版本 ${latest}，点击前往更新`}
+      title={translate("发现新版本 %{latest}，点击前往更新", { latest: latest })}
       className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 font-medium text-primary-foreground text-xs transition-opacity hover:opacity-90"
     >
       {/* 呼吸点：顶栏元素很多，纯文字容易被忽略，动效让它一眼可见。 */}
@@ -51,8 +53,11 @@ export function UpdateBadge() {
         <span className="relative inline-flex size-1.5 rounded-full bg-primary-foreground" />
       </span>
       <ArrowUpCircleIcon className="size-3.5" />
-      <span className="hidden sm:inline">新版本 {latest}</span>
-      <span className="sm:hidden">新版本</span>
+      <Trans
+        i18nKey={"<c0>新版本 %{latest}</c0><c1>新版本</c1>"}
+        values={{ latest: latest }}
+        components={{ c0: <span className="hidden sm:inline" />, c1: <span className="sm:hidden" /> }}
+      />
     </Link>
   );
 }

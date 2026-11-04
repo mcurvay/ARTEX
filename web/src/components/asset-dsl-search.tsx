@@ -5,6 +5,7 @@ import * as React from "react";
 import { SearchIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { translate } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 // ── DSL autocomplete ──────────────────────────────────────────────────────────
@@ -341,7 +342,7 @@ export function AssetDslSearch({
         <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           ref={inputRef}
-          placeholder="DSL 搜索：domain=example AND status_code>=400"
+          placeholder={translate("DSL 搜索：domain=example AND status_code>=400")}
           value={query}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -366,8 +367,10 @@ export function AssetDslSearch({
                   apply(s);
                 }}
               >
-                <span className={cn("shrink-0 font-mono text-xs font-semibold", KIND_STYLE[s.kind])}>{s.label}</span>
-                <span className="text-xs text-muted-foreground">{s.desc}</span>
+                <span className={cn("shrink-0 font-mono text-xs font-semibold", KIND_STYLE[s.kind])}>
+                  {translate(s.label)}
+                </span>
+                <span className="text-xs text-muted-foreground">{translate(s.desc)}</span>
               </button>
             ))}
           </div>
@@ -375,7 +378,13 @@ export function AssetDslSearch({
       </div>
       {query.trim() && !open && (
         <p className="pl-1 text-[11px] text-muted-foreground">
-          {loading ? "搜索中…" : error ? <span className="text-destructive">{error}</span> : `找到 ${count ?? 0} 条`}
+          {loading ? (
+            translate("搜索中…")
+          ) : error ? (
+            <span className="text-destructive">{error}</span>
+          ) : (
+            translate("找到 %{v} 条", { v: count ?? 0 })
+          )}
         </p>
       )}
     </div>
